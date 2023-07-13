@@ -7,7 +7,7 @@ public static class GoogleHttpClient
 {
     public static void AddGoogleMailHttpClient(this IServiceCollection service)
     {
-        service.AddHttpClient("google-mail", (provider, client) =>
+        service.AddHttpClient("google", (provider, client) =>
         {
             var context = provider.GetRequiredService<IHttpContextAccessor>();
             var tokenStore = provider.GetRequiredService<TokenStore>();
@@ -16,7 +16,7 @@ public static class GoogleHttpClient
 
             var token = tokenStore.GetToken(userId).Result;
 
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token.Token}");
             client.BaseAddress = new Uri("https://gmail.googleapis.com");
         });
     }

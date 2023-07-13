@@ -15,16 +15,16 @@ public sealed class TokenStore
         _tokens = provider.RedisCollection<UserToken>();
     }
 
-    public async Task<string> GetToken(string id)
+    public async Task<UserToken> GetToken(string id)
     {
         var userToken = await _tokens.FindByIdAsync(id);
 
-        if (userToken is null) throw new NullReferenceException();
-
-        return userToken.Token;
+        return userToken is null
+            ? throw new NullReferenceException()
+            : userToken;
     }
 
-    public async Task SaveToken(string id, string token)
+    public async Task SaveToken(string id, string token, string? refreshToken)
     {
         var userToken = await _tokens.FindByIdAsync(id);
 
@@ -33,13 +33,16 @@ public sealed class TokenStore
             userToken = new UserToken
             {
                 Token = token,
-                UserId = id.Replace("-", "")
+                UserId = id.Replace("-", ""),
+                RefreshToken = refreshToken,
+                LastUpdate = DateTime.UtcNow
             };
 
             await _tokens.InsertAsync(userToken);
         }
 
         userToken.Token = token;
+        userToken.LastUpdate = DateTime.UtcNow;
 
         await _tokens.SaveAsync();
     }

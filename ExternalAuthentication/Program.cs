@@ -41,11 +41,6 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
 app.MapGet("/api/users/info", (HttpContext context) =>
 {
     var id = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

@@ -11,10 +11,11 @@ public static class ConfigGoogleAuthenticationService
     {
         builder.AddOAuth("google", opt =>
         {
+              
             opt.SignInScheme = "cookie";
             opt.ClientId = "745405021313-h6sj59gf0jh0u8gmsoaer0p2ie11ahpe.apps.googleusercontent.com";
             opt.ClientSecret = "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";
-            opt.AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+            opt.AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth?access_type=offline";
             opt.TokenEndpoint = "https://oauth2.googleapis.com/token";
             opt.UserInformationEndpoint = "https://www.googleapis.com/oauth2/v2/userinfo";
             opt.CallbackPath = "/oauth2-callback";
@@ -26,7 +27,10 @@ public static class ConfigGoogleAuthenticationService
             opt.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
             opt.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "name");
 
-            opt.Events.OnCreatingTicket = async context => 
+            //save access_token/refresh token in http cookie
+            //opt.SaveTokens = true;
+
+            opt.Events.OnCreatingTicket = async context =>
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
 
@@ -42,7 +46,7 @@ public static class ConfigGoogleAuthenticationService
 
                 var userId = user.GetString("id") ?? throw new Exception();
 
-                await store.SaveToken(userId, context.AccessToken!);
+                await store.SaveToken(userId, context.AccessToken!, context.RefreshToken);
             };
         });
 
