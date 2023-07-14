@@ -7,6 +7,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Web;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace ExternalAuthentication.Google;
 
@@ -27,8 +28,10 @@ public static class GoogleApiSetup
         });
 
         app.MapPost("/google/token/refresh", async ([FromServices] TokenStore store,
-            [FromServices] IHttpContextAccessor http) =>
+            [FromServices] IHttpContextAccessor http,
+            IOptions<GoogleOption> options) =>
         {
+            var option = options.Value;
             var userId = http.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null)
@@ -44,8 +47,8 @@ public static class GoogleApiSetup
             var request = new HttpRequestMessage(HttpMethod.Post, "https://oauth2.googleapis.com/token");
             request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                {"client_id", "745405021313-h6sj59gf0jh0u8gmsoaer0p2ie11ahpe.apps.googleusercontent.com" },
-                {"client_secret", "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" },
+                {"client_id", option.ClientId },
+                {"client_secret", option.ClientSecret },
                 {"refresh_token", userToken.RefreshToken! },
                 {"grant_type", "refresh_token" }
             });

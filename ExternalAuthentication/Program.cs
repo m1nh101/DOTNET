@@ -1,17 +1,12 @@
 using ExternalAuthentication.Google;
 using ExternalAuthentication.Store;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.Configure<JsonSerializerOptions>(opt =>
-{
-    opt.PropertyNameCaseInsensitive = true;
-    opt.IncludeFields = true;
-});
+builder.Services.Configure<IOptions<GoogleOption>>(GoogleOption.Google, builder.Configuration.GetSection("Oauth:Google"));
 
 builder.Services.ConfigureUserTokenStore(builder.Configuration);
 
@@ -19,7 +14,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication("cookie")
     .AddCookie("cookie")
-    .AddGoogle();
+    .AddGoogle(builder.Configuration);
 
 builder.Services.AddAuthorization();
 

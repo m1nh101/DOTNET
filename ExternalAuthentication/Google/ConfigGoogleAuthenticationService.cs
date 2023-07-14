@@ -7,22 +7,25 @@ namespace ExternalAuthentication.Google;
 
 public static class ConfigGoogleAuthenticationService
 {
-    public static AuthenticationBuilder AddGoogle(this AuthenticationBuilder builder)
+    public static AuthenticationBuilder AddGoogle(this AuthenticationBuilder builder, IConfiguration configuration)
     {
-        builder.AddOAuth("google", opt =>
+        var option = configuration.GetSection("Oauth:Google").Get<GoogleOption>() ?? throw new Exception();
+
+        builder.AddOAuth(GoogleOption.Google, opt =>
         {
               
             opt.SignInScheme = "cookie";
-            opt.ClientId = "745405021313-h6sj59gf0jh0u8gmsoaer0p2ie11ahpe.apps.googleusercontent.com";
-            opt.ClientSecret = "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";
-            opt.AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth?access_type=offline";
-            opt.TokenEndpoint = "https://oauth2.googleapis.com/token";
-            opt.UserInformationEndpoint = "https://www.googleapis.com/oauth2/v2/userinfo";
-            opt.CallbackPath = "/oauth2-callback";
+            opt.ClientId = option.ClientId;
+            opt.ClientSecret = option.ClientSecret;
+            opt.AuthorizationEndpoint = option.AuthorizationEndPoint;
+            opt.TokenEndpoint = option.TokenEndPoint;
+            opt.UserInformationEndpoint = option.TokenEndPoint;
+            opt.CallbackPath = opt.CallbackPath;
+
+            foreach(var scope in option.Scopes)
+                opt.Scope.Add(scope);
 
             opt.Scope.Add("https://www.googleapis.com/auth/gmail.readonly");
-            opt.Scope.Add("profile");
-            opt.Scope.Add("email");
 
             opt.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
             opt.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "name");
