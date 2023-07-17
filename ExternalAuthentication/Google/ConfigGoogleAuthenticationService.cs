@@ -13,14 +13,13 @@ public static class ConfigGoogleAuthenticationService
 
         builder.AddOAuth(GoogleOption.Google, opt =>
         {
-              
             opt.SignInScheme = "cookie";
             opt.ClientId = option.ClientId;
             opt.ClientSecret = option.ClientSecret;
             opt.AuthorizationEndpoint = option.AuthorizationEndPoint;
             opt.TokenEndpoint = option.TokenEndPoint;
-            opt.UserInformationEndpoint = option.TokenEndPoint;
-            opt.CallbackPath = opt.CallbackPath;
+            opt.UserInformationEndpoint = option.UserInfoEndPoint;
+            opt.CallbackPath = option.CallbackPath;
 
             foreach(var scope in option.Scopes)
                 opt.Scope.Add(scope);

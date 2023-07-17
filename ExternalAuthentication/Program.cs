@@ -6,13 +6,13 @@ using System.Security.Claims;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.Configure<IOptions<GoogleOption>>(GoogleOption.Google, builder.Configuration.GetSection("Oauth:Google"));
+builder.Services.AddOptions<GoogleOption>().Bind(builder.Configuration.GetSection("Oauth:Google"));
 
 builder.Services.ConfigureUserTokenStore(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddAuthentication("cookie")
+builder.Services.AddAuthentication(GoogleOption.Google)
     .AddCookie("cookie")
     .AddGoogle(builder.Configuration);
 

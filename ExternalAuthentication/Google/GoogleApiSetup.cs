@@ -24,7 +24,7 @@ public static class GoogleApiSetup
             };
 
             return Results.Challenge(authenticationProperties,
-            authenticationSchemes: new List<string>() { "google" });
+            authenticationSchemes: new List<string>() { GoogleOption.Google });
         });
 
         app.MapPost("/google/token/refresh", async ([FromServices] TokenStore store,
@@ -41,7 +41,7 @@ public static class GoogleApiSetup
 
             using var client = new HttpClient()
             {
-                BaseAddress = new Uri("https://oauth2.googleapis.com/token"),
+                //BaseAddress = new Uri("https://oauth2.googleapis.com/token"),
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, "https://oauth2.googleapis.com/token");
@@ -52,14 +52,6 @@ public static class GoogleApiSetup
                 {"refresh_token", userToken.RefreshToken! },
                 {"grant_type", "refresh_token" }
             });
-
-            //var parameters = new Dictionary<string, string?>
-            //{
-            //    {"client_id", "745405021313-h6sj59gf0jh0u8gmsoaer0p2ie11ahpe.apps.googleusercontent.com" },
-            //    {"client_secret", "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" },
-            //    {"refresh_token", userToken.RefreshToken! },
-            //    {"grant_type", "refresh_token" }
-            //};
 
             var response = await client.SendAsync(request);
 
@@ -88,6 +80,10 @@ public static class GoogleApiSetup
             var token = await store.GetToken(userId);
 
             await client.PostAsync($"/revoke?token={token}", default);
+
+            await http.HttpContext.SignOutAsync();
+
+            await store.RevokeToken(userId);
         }).RequireAuthorization();
 
         app.MapGet("/google/email", async ([FromServices] IHttpClientFactory factory) =>
